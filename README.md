@@ -19,7 +19,7 @@
 ## About The Project
 
 Store Rating WebApp is a platform where users can rate stores and store owners can get insights about their ratings.  
-It features role-based dashboards for Admins, Normal Users, and Store Owners, each with specific functionalities.
+It features role-based dashboards for Admins, Normal Users and Store Owners, each with specific functionalities.
 
 ---
 
@@ -39,8 +39,8 @@ It features role-based dashboards for Admins, Normal Users, and Store Owners, ea
 
 ## Features
 
-- Role-based login for Admin, Normal Users, and Store Owners
-- Admin Dashboard: overview of users, stores, and ratings
+- Role-based login for Admin, Normal Users and Store Owners
+- Admin Dashboard: overview of users, stores and ratings
 - User Dashboard: browse stores, submit and edit ratings
 - Store Owner Dashboard: track ratings and average store rating
 - Real-time search and sorting for lists
@@ -52,7 +52,7 @@ It features role-based dashboards for Admins, Normal Users, and Store Owners, ea
 
 ### System Admin
 - Manage all users and stores
-- View total users, stores, and ratings
+- View total users, stores and ratings
 - Filter users and stores by key attributes
 - Logout
 
