@@ -10,7 +10,7 @@
 <p align="center">
   Explore stores and submit ratings based on your experience.  
   <br />
-  <a href="https://store-rating-app.vercel.app/">View Demo</a>
+  <a href="https://store-rating-app.vercel.app/">Live View</a>
 </p>
 </div>
 
@@ -20,8 +20,6 @@
 
 Store Rating WebApp is a platform where users can rate stores and store owners can get insights about their ratings.  
 It features role-based dashboards for Admins, Normal Users, and Store Owners, each with specific functionalities.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
 
@@ -36,8 +34,6 @@ It features role-based dashboards for Admins, Normal Users, and Store Owners, ea
   <img src="https://img.shields.io/badge/.ENV-222222?style=for-the-badge&logo=.env&logoColor=ECD53F" alt=".ENV">
   <img src="https://img.shields.io/badge/Redux-764ABC?style=for-the-badge&logo=redux&logoColor=FFFFFF" alt="Redux">
 </div>
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
 
@@ -79,12 +75,7 @@ It features role-based dashboards for Admins, Normal Users, and Store Owners, ea
 - **Name:** 20–60 characters  
 - **Address:** max 400 characters  
 - **Password:** 8–16 characters, must include uppercase and special character  
-- **Email:** valid format  
+- **Email:** Must follow valid format
 
----
 
-### Notes
-- Sorting available on all tables  
-- Followed best practices for frontend, backend, and database design  
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
