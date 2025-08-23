@@ -5,7 +5,7 @@
     <img src="public/cafe3d.jpg" alt="Logo" width="100" height="80">
   </a>
 
-<h1 align="center">Store Rating WebApp</h1>
+<h1 align="center">Store Rating Application</h1>
 
 <p align="center">
   Explore stores and submit ratings based on your experience.  
