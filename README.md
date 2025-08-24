@@ -10,7 +10,8 @@
 <p align="center">
   Explore stores and submit ratings based on your experience.  
   <br />
-  <a href="https://store-rating-app.vercel.app/">Live View</a>
+  <a href="https://store-rating-app.vercel.app/">Live View</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://store-rating-app-nine.vercel.app/auth/sign-in">User Login</a>
 </p>
 </div>
 
