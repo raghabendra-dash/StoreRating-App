@@ -63,7 +63,7 @@ const SignIn = () => {
     passwordip.disabled = true;
     const { email, password } = formData;
     try {
-      const res = await axios.post(`/api/signin`, {
+      const res = await axios.post(`https://store-rating-app-15r6.vercel.app/auth/sign-in`, {
         email,
         password,
       });
