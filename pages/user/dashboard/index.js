@@ -90,7 +90,7 @@ const Dashboard = () => {
                       className="rounded-xl"
                       src={storeImg}
                       alt="store image"
-                      height={200}
+                      height={100}
                       width={300}
                     />
                   </div>
@@ -107,7 +107,7 @@ const Dashboard = () => {
                   <div>
                     <p className=" text-lg">Rating</p>
                     <Rating
-                      style={{ maxWidth: 150 }}
+                      style={{ maxWidth: 100 }}
                       value={overall_rating}
                       itemStyles={myStyles}
                       radius="small"
@@ -118,7 +118,7 @@ const Dashboard = () => {
                     onClick={() => {
                       setPopupInfo(store);
                     }}
-                    className="p-3 text-center w-full bg-black text-white rounded-xl"
+                    className="px-4 pb-0 text-md text-white bg-black rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
                   >
                     Rate this store
                   </button>
