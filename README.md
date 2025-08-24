@@ -28,11 +28,11 @@ It features role-based dashboards for Admins, Normal Users and Store Owners, eac
 <div align="center">
   <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js">
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React.js">
+  <img src="https://img.shields.io/badge/Redux-764ABC?style=for-the-badge&logo=redux&logoColor=FFFFFF" alt="Redux">
   <img src="https://img.shields.io/badge/Tailwind%20CSS-222222?style=for-the-badge&logo=tailwind-css&logoColor=06B6D4" alt="Tailwind CSS">
   <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=FFFFFF" alt="MongoDB">
   <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=FFFFFF" alt="Vercel">
   <img src="https://img.shields.io/badge/.ENV-222222?style=for-the-badge&logo=.env&logoColor=ECD53F" alt=".ENV">
-  <img src="https://img.shields.io/badge/Redux-764ABC?style=for-the-badge&logo=redux&logoColor=FFFFFF" alt="Redux">
 </div>
 
 ---
