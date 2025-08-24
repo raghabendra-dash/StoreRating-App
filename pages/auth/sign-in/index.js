@@ -58,36 +58,37 @@ const SignIn = () => {
     requestSignin(emailip, passwordip);
   }
 
-  async function requestSignin(emailip, passwordip) {
-    emailip.disabled = true;
-    passwordip.disabled = true;
-    const { email, password } = formData;
-    try {
-      const res = await axios.post(`/api/signin`, {
-        email,
-        password,
-      });
-      const { message, data, userData } = res.data;
-      if (message === "error") {
-        toastMsg("error", data);
-      } else {
-        dispatch(userDataActions.saveUserData({ ...userData, ...data }));
-        toastMsg("success", "Sign In Success !!");
-        router.push(
-          userData.role == roles.ADMIN
-            ? "/admin/dashboard"
-            : userData.role == roles.USER
-            ? "/user/dashboard"
-            : "/store-owner/dashboard"
-        );
-      }
-    } catch (error) {
-      //console.log("error in sign in:", error);
-    } finally {
-      emailip.disabled = false;
-      passwordip.disabled = false;
+ async function requestSignin(emailip, passwordip) {
+  emailip.disabled = true;
+  passwordip.disabled = true;
+
+  const { email, password } = formData;
+
+  try {
+    const res = await axios.post("/api/signin", { email, password });
+    const { message, userData, data } = res.data;
+
+    if (message === "error") {
+      toastMsg("error", data);
+    } else {
+      dispatch(userDataActions.saveUserData(userData));
+      toastMsg("success", "Sign In Success !!");
+      router.push(
+        userData.role === roles.ADMIN
+          ? "/admin/dashboard"
+          : userData.role === roles.USER
+          ? "/user/dashboard"
+          : "/store-owner/dashboard"
+      );
     }
+  } catch (error) {
+    toastMsg("error", "Something went wrong!");
+  } finally {
+    emailip.disabled = false;
+    passwordip.disabled = false;
   }
+}
+
   return (
     <>
       <Head>

@@ -1,33 +1,40 @@
-import axios from "axios";
-import googleAuthURIs from "@/utils/googleAuthURIs";
 import { MongoClient } from "mongodb";
+import bcrypt from "bcryptjs";
+
 const uri = process.env.MONGODB_URI;
-const googleapikey = process.env.GOOGLE_API_KEY;
-const SIGNINURL = `${googleAuthURIs.SignInUrl}${googleapikey}`;
+
 export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "error", data: "Method not allowed" });
+  }
+
   const client = new MongoClient(uri);
-  if (req.method === "POST") {
+
+  try {
+    await client.connect();
     const database = client.db("StoresRatingApp");
     const collection = database.collection("users");
-    const query = { email: req.body.email };
-    const userInfo = await collection.findOne(query);
+
     const { email, password } = req.body;
-    try {
-      const result = await axios.post(SIGNINURL, {
-        email,
-        password,
-        returnSecureToken: true,
-      });
-      res
-        .status(200)
-        .json({ message: "success", data: result.data, userData: userInfo });
-    } catch (error) {
-      let errormsg;
-      errormsg = error?.response?.data.error.message;
-      //console.log("error in backend sign in api", errormsg);
-      res.status(200).json({ message: "error", data: errormsg });
-    } finally {
-      client.close();
+
+    const user = await collection.findOne({ email });
+    if (!user) {
+      return res.status(200).json({ message: "error", data: "User not found" });
     }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(200).json({ message: "error", data: "Invalid password" });
+    }
+
+    // Remove password before sending
+    const { password: pw, ...userData } = user;
+
+    res.status(200).json({ message: "success", userData });
+  } catch (error) {
+    console.error("Sign-in error:", error);
+    res.status(500).json({ message: "error", data: "Internal server error" });
+  } finally {
+    client.close();
   }
 }

@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import bcrypt from "bcryptjs";
 import roles from "@/utils/roles";
 
 const uri = process.env.MONGODB_URI;
@@ -17,26 +18,32 @@ export default async function handler(req, res) {
 
     const { email, password, name, address, role } = req.body;
 
-    // --- Simulated Google signup response ---
-    const result = {
-      status: 200,
-      data: { idToken: "sample-token", email },
+    // Check if user already exists
+    const existingUser = await collection.findOne({ email });
+    if (existingUser) {
+      return res.status(200).json({ message: "error", data: "Email already exists" });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Prepare user document
+    const userData = {
+      email,
+      password: hashedPassword,
+      name,
+      address,
+      role: role || roles.USER,
     };
 
-    // Prepare MongoDB document
-    const userData = { email, name, address, role: role || roles.USER };
-
-    // Remove store-specific fields if not a store owner
     if (userData.role !== roles.STOREOW) {
       delete userData.store_name;
       delete userData.overall_rating;
     }
 
-    // Insert user into MongoDB
     await collection.insertOne(userData);
 
-    // Respond as if Google signup succeeded
-    res.status(200).json({ message: "success", data: result.data });
+    res.status(200).json({ message: "success", data: { email, name } });
   } catch (error) {
     console.error("Signup error:", error);
     res.status(500).json({ message: "error", data: error.message });
