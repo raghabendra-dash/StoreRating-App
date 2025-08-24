@@ -1,7 +1,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/store-rating-app">
+  <a href="https://store-rating-app-nine.vercel.app/user/dashboard">
     <img src="public/cafe3d.jpg" alt="Logo" width="100" height="80">
   </a>
 
