@@ -4,7 +4,7 @@ import Form from "@/components/UI/FormComponents/Form/Form";
 import InputContainer from "@/components/UI/FormComponents/InputContainer/InputContainer";
 import Input from "@/components/UI/FormComponents/Input/Input";
 import FormButton from "@/components/UI/FormComponents/FormButton/FormButton";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import toastMsg from "@/utils/DisplayToast";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,7 +12,6 @@ import { userDataActions } from "@/redux-store/userDataSlice";
 import { useRouter } from "next/router";
 import roles from "@/utils/roles";
 import Head from "next/head";
-
 const SignIn = () => {
   const { user } = useSelector((state) => state.userData);
   const { name, role } = user;
@@ -23,74 +22,57 @@ const SignIn = () => {
     email: "",
     password: "",
   });
+  if (name) {
+    router.replace(
+      role == roles.ADMIN
+        ? "/admin/dashboard"
+        : role == roles.USER
+        ? "/user/dashboard"
+        : "/store-owner/dashboard"
+    );
+  }
   const [emailerror, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (name) {
-      router.replace(
-        role == roles.ADMIN
-          ? "/admin/dashboard"
-          : role == roles.USER
-          ? "/user/dashboard"
-          : "/store-owner/dashboard"
-      );
-    }
-  }, [name, role, router]);
 
   function changeHandler(event, name) {
     const value = event.target.value;
     setFormData((prev) => ({ ...prev, [name]: value }));
   }
-
   function validation(e) {
-    e.preventDefault();
     setEmailError("");
     setPasswordError("");
-
+    e.preventDefault();
+    const emailip = e.target["signin-email"];
+    const passwordip = e.target["signin-password"];
     const email = formData.email;
     const password = formData.password;
 
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       setEmailError("Invalid Email");
-      return false;
+      return;
     }
     if (password.length < 6) {
-      setPasswordError("Password should have at least 6 characters");
-      return false;
+      setPasswordError("Password should have more than 8 characters");
+      return;
     }
-    
-    return true;
+    requestSignin(emailip, passwordip);
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    
-    if (!validation(e)) return;
-    
-    setIsLoading(true);
-    const emailInput = e.target["signin-email"];
-    const passwordInput = e.target["signin-password"];
-    
-    emailInput.disabled = true;
-    passwordInput.disabled = true;
-
+  async function requestSignin(emailip, passwordip) {
+    emailip.disabled = true;
+    passwordip.disabled = true;
+    const { email, password } = formData;
     try {
-      const res = await axios.post(`/api/auth/signin`, {
-        email: formData.email,
-        password: formData.password,
+      const res = await axios.post(`/api/signin`, {
+        email,
+        password,
       });
-      
       const { message, data, userData } = res.data;
-      
       if (message === "error") {
         toastMsg("error", data);
       } else {
         dispatch(userDataActions.saveUserData({ ...userData, ...data }));
         toastMsg("success", "Sign In Success !!");
-        
         router.push(
           userData.role == roles.ADMIN
             ? "/admin/dashboard"
@@ -100,15 +82,12 @@ const SignIn = () => {
         );
       }
     } catch (error) {
-      console.error("Sign in error:", error);
-      toastMsg("error", "An error occurred during sign in");
+      //console.log("error in sign in:", error);
     } finally {
-      emailInput.disabled = false;
-      passwordInput.disabled = false;
-      setIsLoading(false);
+      emailip.disabled = false;
+      passwordip.disabled = false;
     }
   }
-
   return (
     <>
       <Head>
@@ -122,16 +101,15 @@ const SignIn = () => {
             routetext="register a new account"
             route="/auth/sign-up"
           />
-          <Form submitFunction={handleSubmit}>
+          <Form submitFunction={validation}>
             <InputContainer>
               <Input
                 id="signin-email"
                 label="Email Address"
-                type="email"
+                type="text"
                 errorMessage={emailerror}
                 value={formData.email}
                 onChange={(e) => changeHandler(e, "email")}
-                required
               />
               <Input
                 id="signin-password"
@@ -140,14 +118,9 @@ const SignIn = () => {
                 errorMessage={passwordError}
                 value={formData.password}
                 onChange={(e) => changeHandler(e, "password")}
-                required
               />
             </InputContainer>
-            <FormButton 
-              type="submit" 
-              label={isLoading ? "Signing In..." : "Sign In"} 
-              disabled={isLoading}
-            />
+            <FormButton type="submit" label="Sign In" />
           </Form>
         </FormPage>
       </div>
