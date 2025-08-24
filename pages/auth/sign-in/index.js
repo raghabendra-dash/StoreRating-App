@@ -1,131 +1,53 @@
-import FormMessage from "@/components/UI/FormComponents/FormMessage/FormMessage";
-import FormPage from "@/components/UI/FormComponents/FormPage/FormPage";
-import Form from "@/components/UI/FormComponents/Form/Form";
-import InputContainer from "@/components/UI/FormComponents/InputContainer/InputContainer";
-import Input from "@/components/UI/FormComponents/Input/Input";
-import FormButton from "@/components/UI/FormComponents/FormButton/FormButton";
-import { useState } from "react";
-import axios from "axios";
-import toastMsg from "@/utils/DisplayToast";
-import { useDispatch, useSelector } from "react-redux";
-import { userDataActions } from "@/redux-store/userDataSlice";
-import { useRouter } from "next/router";
-import roles from "@/utils/roles";
-import Head from "next/head";
-const SignIn = () => {
-  const { user } = useSelector((state) => state.userData);
-  const { name, role } = user;
+import { MongoClient } from "mongodb";
+import bcrypt from "bcryptjs";
 
-  const dispatch = useDispatch();
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  if (name) {
-    router.replace(
-      role == roles.ADMIN
-        ? "/admin/dashboard"
-        : role == roles.USER
-        ? "/user/dashboard"
-        : "/store-owner/dashboard"
-    );
+const uri = process.env.MONGODB_URI;
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" });
   }
-  const [emailerror, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
 
-  function changeHandler(event, name) {
-    const value = event.target.value;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }
-  function validation(e) {
-    setEmailError("");
-    setPasswordError("");
-    e.preventDefault();
-    const emailip = e.target["signin-email"];
-    const passwordip = e.target["signin-password"];
-    const email = formData.email;
-    const password = formData.password;
-
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      setEmailError("Invalid Email");
-      return;
+  const client = new MongoClient(uri);
+  
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: "error", data: "Email and password are required" });
     }
-    if (password.length < 6) {
-      setPasswordError("Password should have more than 8 characters");
-      return;
-    }
-    requestSignin(emailip, passwordip);
-  }
 
-  async function requestSignin(emailip, passwordip) {
-    emailip.disabled = true;
-    passwordip.disabled = true;
-    const { email, password } = formData;
-    try {
-      const res = await axios.post(`/api/sign-in`, {
-        email,
-        password,
-      });
-      const { message, data, userData } = res.data;
-      if (message === "error") {
-        toastMsg("error", data);
-      } else {
-        dispatch(userDataActions.saveUserData({ ...userData, ...data }));
-        toastMsg("success", "Sign In Success !!");
-        router.push(
-          userData.role == roles.ADMIN
-            ? "/admin/dashboard"
-            : userData.role == roles.USER
-            ? "/user/dashboard"
-            : "/store-owner/dashboard"
-        );
-      }
-    } catch (error) {
-      //console.log("error in sign in:", error);
-    } finally {
-      emailip.disabled = false;
-      passwordip.disabled = false;
+    await client.connect();
+    const database = client.db("StoresRatingApp");
+    const collection = database.collection("users");
+    
+    // Find user by email
+    const user = await collection.findOne({ email });
+    
+    if (!user) {
+      return res.status(401).json({ message: "error", data: "Invalid email or password" });
     }
+    
+    // Compare password with stored hash
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "error", data: "Invalid email or password" });
+    }
+    
+    // Remove password from user data before sending to client
+    const { password: _, ...userWithoutPassword } = user;
+    
+    res.status(200).json({ 
+      message: "success", 
+      data: { id: user._id.toString() },
+      userData: userWithoutPassword
+    });
+    
+  } catch (error) {
+    console.error("Sign in error:", error);
+    res.status(500).json({ message: "error", data: "Internal server error" });
+  } finally {
+    await client.close();
   }
-  return (
-    <>
-      <Head>
-        <title>Sign In</title>
-      </Head>
-      <div className="min-h-[inherit] flex justify-center items-center">
-        <FormPage>
-          <FormMessage
-            header="Sign in to your account"
-            subtext="Or"
-            routetext="register a new account"
-            route="/auth/sign-up"
-          />
-          <Form submitFunction={validation}>
-            <InputContainer>
-              <Input
-                id="signin-email"
-                label="Email Address"
-                type="text"
-                errorMessage={emailerror}
-                value={formData.email}
-                onChange={(e) => changeHandler(e, "email")}
-              />
-              <Input
-                id="signin-password"
-                label="Password"
-                type="password"
-                errorMessage={passwordError}
-                value={formData.password}
-                onChange={(e) => changeHandler(e, "password")}
-              />
-            </InputContainer>
-            <FormButton type="submit" label="Sign In" />
-          </Form>
-        </FormPage>
-      </div>
-    </>
-  );
-};
-
-export default SignIn;
+}
