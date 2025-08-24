@@ -11,34 +11,34 @@ import roles from "@/utils/roles";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-function passwordValidation(value, setPasswordError, setIsValid) {
+// Password validation returns boolean
+function passwordValidation(value, setPasswordError) {
   if (value.length < 8) {
-    setPasswordError("Password should be more than 8 characters");
-    return;
+    setPasswordError("Password should be at least 8 characters");
+    return false;
   }
-  if (!value.match(/[0-9]/)) {
-    setPasswordError("Password should be a number [0-9]");
-    return;
+  if (!/[0-9]/.test(value)) {
+    setPasswordError("Password should include a number [0-9]");
+    return false;
   }
-  if (!value.match(/[a-z]/)) {
-    setPasswordError("Password should be a Lowercase letter");
-    return;
+  if (!/[a-z]/.test(value)) {
+    setPasswordError("Password should include a lowercase letter");
+    return false;
   }
-  if (!value.match(/[A-Z]/)) {
-    setPasswordError("Password should be an Uppercase letter");
-    return;
+  if (!/[A-Z]/.test(value)) {
+    setPasswordError("Password should include an uppercase letter");
+    return false;
   }
-  if (!value.match(/\W/)) {
-    setPasswordError("Password should be a Special character");
-    return;
+  if (!/\W/.test(value)) {
+    setPasswordError("Password should include a special character");
+    return false;
   }
   if (value.length > 16) {
-    setPasswordError(
-      "Password should be less than or equal to 16 characters"
-    );
-    return;
+    setPasswordError("Password should be ≤ 16 characters");
+    return false;
   }
-  setIsValid(true);
+  setPasswordError("");
+  return true;
 }
 
 const SignUp = () => {
@@ -49,88 +49,77 @@ const SignUp = () => {
     name: "",
     address: "",
   });
-  const [isValid, setIsValid] = useState();
-  const [emailerror, setEmailError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [addressError, setAddressError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  function changeHandler(event, name) {
-    const value = event.target.value;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }
+  const changeHandler = (event, field) => {
+    setFormData((prev) => ({ ...prev, [field]: event.target.value }));
+  };
 
-  function validation(e) {
+  const validation = (e) => {
+    e.preventDefault();
     setEmailError("");
-    setPasswordError("");
     setNameError("");
     setAddressError("");
+    setPasswordError("");
 
-    e.preventDefault();
-    const emailip = e.target["signup-email"];
-    const passwordip = e.target["signup-password"];
-    const nameip = e.target["signup-name"];
-    const addressip = e.target["signup-address"];
     const { email, password, name, address } = formData;
 
-    if (name.length < 20) {
-      setNameError("Name should be 20 characters or above");
+    // Basic validations
+    if (name.length < 3 || name.length > 60) {
+      setNameError("Name should be between 3 and 60 characters");
       return;
     }
-    if (name.length > 60) {
-      setNameError("Name should be 60 characters or below");
+    if (address.length < 10 || address.length > 400) {
+      setAddressError("Address should be 10-400 characters");
       return;
     }
-
-    if (address.length < 10) {
-      setAddressError("Address should be more than 10 characters");
-    }
-
-    if (address.length > 400) {
-      setAddressError("Maximum 400 characters are allowed");
-      return;
-    }
-
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      setEmailError("Invalid Email");
+      setEmailError("Invalid email");
       return;
     }
+    if (!passwordValidation(password, setPasswordError)) return;
 
-    passwordValidation(password, setPasswordError, setIsValid);
+    requestSignUp();
+  };
 
-    if (isValid) requestSignUp(emailip, passwordip, nameip, addressip);
-  }
-  async function requestSignUp(emailip, passwordip, nameip, addressip) {
-    emailip.disabled = true;
-    passwordip.disabled = true;
-    nameip.disabled = true;
-    addressip.disabled = true;
-    const { email, password, name, address } = formData;
-    if (isValid) {
-      const res = await axios.post("/api/signup", {
-        email,
-        password,
-        name,
-        address,
+  const requestSignUp = async () => {
+    const inputs = [
+      "signup-email",
+      "signup-password",
+      "signup-name",
+      "signup-address",
+    ].map((id) => document.getElementById(id));
+
+    inputs.forEach((input) => (input.disabled = true));
+
+    try {
+      const payload = {
+        email: formData.email.trim(),
+        password: formData.password,
+        name: formData.name.trim(),
+        address: formData.address.trim(),
         role: roles.USER,
-      });
-      emailip.value = "";
-      passwordip.value = "";
-      nameip.value = "";
-      addressip.value = "";
+      };
+
+      const res = await axios.post("/api/signup", payload);
       const { message, data } = res.data;
+
       if (message === "error") {
         toastMsg("error", data);
       } else {
-        toastMsg("success", "Account created Successfully !!");
+        toastMsg("success", "Account created successfully!");
+        setFormData({ email: "", password: "", name: "", address: "" });
         router.replace("/auth/sign-in");
       }
+    } catch (error) {
+      toastMsg("error", "Something went wrong!");
+    } finally {
+      inputs.forEach((input) => (input.disabled = false));
     }
-    emailip.disabled = false;
-    passwordip.disabled = false;
-    nameip.disabled = false;
-    addressip.disabled = false;
-  }
+  };
 
   return (
     <>
@@ -159,7 +148,7 @@ const SignUp = () => {
                 id="signup-email"
                 label="Email Address"
                 type="text"
-                errorMessage={emailerror}
+                errorMessage={emailError}
                 value={formData.email}
                 onChange={(e) => changeHandler(e, "email")}
               />
@@ -173,8 +162,8 @@ const SignUp = () => {
               />
               <Input
                 label="Address"
-                name={"signup-address"}
-                id={"signup-address"}
+                name="signup-address"
+                id="signup-address"
                 value={formData.address}
                 onChange={(e) => changeHandler(e, "address")}
                 as="textarea"
